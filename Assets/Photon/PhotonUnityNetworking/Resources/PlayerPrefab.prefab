@@ -157,6 +157,7 @@ GameObject:
   - component: {fileID: 7006301527895857204}
   - component: {fileID: 8352894261716301445}
   - component: {fileID: 575438323643627736}
+  - component: {fileID: 7397500591950515853}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Player
@@ -255,8 +256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c8b1bbacb9b07043b43eaa8af453bb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fireballPrefab: {fileID: 1581067121613960584, guid: 79d8c0b07a8b8de45bd7f4ff77fe8d80, type: 3}
-  fireCooldown: 0.5
+  equippedSpells: []
   fireOffsetDistance: 0.5
 --- !u!114 &7006301527895857204
 MonoBehaviour:
@@ -312,6 +312,25 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &7397500591950515853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471653937800469909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1939d551e4e82fc46a3a04b8095decf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxMana: 100
+  rechargeRate: 10
+  rechargeDelay: 1
+  onManaChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  currentMana: 0
 --- !u!1 &3415885528782223197
 GameObject:
   m_ObjectHideFlags: 0

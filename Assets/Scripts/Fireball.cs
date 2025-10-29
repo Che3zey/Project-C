@@ -1,7 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 
-public class Fireball : MonoBehaviourPun
+public class Fireball : Spell
 {
     [Header("Fireball Settings")]
     public float speed = 10f;
@@ -20,6 +20,11 @@ public class Fireball : MonoBehaviourPun
         sr = GetComponentInChildren<SpriteRenderer>();
         if (sr == null)
             Debug.LogWarning("Fireball: No SpriteRenderer found!");
+
+        // Base Spell setup
+        spellName = "Fireball";
+        manaCost = 10f;
+        cooldown = 1.5f;
     }
 
     void Start()
@@ -104,5 +109,12 @@ public class Fireball : MonoBehaviourPun
         {
             PhotonNetwork.Destroy(gameObject);
         }
+    }
+
+    // Required override for base Spell
+    public override void Cast(GameObject caster)
+    {
+        // Fireball spawns are handled externally (from player's cast code)
+        // This method just exists for consistency
     }
 }

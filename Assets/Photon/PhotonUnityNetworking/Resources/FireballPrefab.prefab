@@ -86,6 +86,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ad83506749607441837ef40f80c9b88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spellName: Fireball
+  manaCost: 10
+  cooldown: 1
   speed: 10
   lifetime: 3
   owner: {fileID: 0}

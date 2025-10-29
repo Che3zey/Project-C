@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4863627546046148007}
   - component: {fileID: 7695972828634252169}
+  - component: {fileID: 7798656395082924078}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -44,4 +45,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0666a1e877b813746bebf4c8d1dde004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnManager: {fileID: 0}
+  playerPrefab: {fileID: 0}
+  mainCamera: {fileID: 0}
+--- !u!114 &7798656395082924078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981309433226565914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2de5c82bb9db6749be0d201325ab743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

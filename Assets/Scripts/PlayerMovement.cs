@@ -11,9 +11,10 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     private SpriteRenderer sr;
 
     private Vector2 moveInput;
-    private Vector2 lastMoveDir = Vector2.down; // default facing down
+    private Vector2 lastMoveDir = Vector2.down; // Default facing down
 
-    // Synced for remote players
+    // Synced variables for remote players
+    private Vector2 networkMoveDir;
     private Vector2 networkLastMoveDir;
     private bool networkIsMoving;
 
@@ -42,18 +43,21 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
 
     void FixedUpdate()
     {
-        if (photonView.IsMine)
-        {
-            rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
-        }
+        if (!photonView.IsMine) return;
+
+        rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
     }
 
+    // -------------------
+    // LOCAL INPUT HANDLING
+    // -------------------
     private void HandleLocalInput()
     {
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
 
-        if (moveInput.magnitude > 1f) moveInput.Normalize();
+        if (moveInput.magnitude > 1f)
+            moveInput.Normalize();
 
         if (moveInput.magnitude > 0.1f)
             lastMoveDir = moveInput;
@@ -63,46 +67,56 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     {
         bool isMoving = moveInput.magnitude > 0.1f;
 
-        // Flip sprite for side movement
+        // Flip only when moving sideways
         if (Mathf.Abs(lastMoveDir.x) > Mathf.Abs(lastMoveDir.y))
             sr.flipX = lastMoveDir.x > 0;
 
-        // Update animator parameters
-        anim.SetFloat("MoveX", moveInput.x);
-        anim.SetFloat("MoveY", moveInput.y);
+        // Use last move dir when idle so we don't face up by default
+        Vector2 displayDir = isMoving ? moveInput : lastMoveDir;
+
+        anim.SetFloat("MoveX", displayDir.x);
+        anim.SetFloat("MoveY", displayDir.y);
         anim.SetFloat("LastMoveX", lastMoveDir.x);
         anim.SetFloat("LastMoveY", lastMoveDir.y);
         anim.SetBool("IsMoving", isMoving);
     }
 
+    // -------------------
+    // REMOTE ANIMATION DISPLAY
+    // -------------------
     private void UpdateRemoteAnimation()
     {
-        // Use synced facing direction for idle
-        bool isMoving = anim.GetBool("IsMoving");
+        Vector2 displayDir = networkIsMoving ? networkMoveDir : networkLastMoveDir;
 
-        Vector2 displayDir = isMoving
-            ? new Vector2(anim.GetFloat("MoveX"), anim.GetFloat("MoveY"))
-            : networkLastMoveDir;
-
-        // Flip side sprite for right-facing
+        // Flip side-facing animations
         if (Mathf.Abs(displayDir.x) > Mathf.Abs(displayDir.y))
             sr.flipX = displayDir.x > 0;
+
+        anim.SetFloat("MoveX", displayDir.x);
+        anim.SetFloat("MoveY", displayDir.y);
+        anim.SetFloat("LastMoveX", networkLastMoveDir.x);
+        anim.SetFloat("LastMoveY", networkLastMoveDir.y);
+        anim.SetBool("IsMoving", networkIsMoving);
     }
 
-    // --- Photon sync for last facing direction ---
+    // -------------------
+    // PHOTON SYNC
+    // -------------------
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
-            // Send last facing direction and moving state
+            bool isMoving = moveInput.magnitude > 0.1f;
+
+            stream.SendNext(isMoving);
+            stream.SendNext(moveInput);
             stream.SendNext(lastMoveDir);
-            stream.SendNext(moveInput.magnitude > 0.1f);
         }
         else
         {
-            // Receive from network
-            networkLastMoveDir = (Vector2)stream.ReceiveNext();
             networkIsMoving = (bool)stream.ReceiveNext();
+            networkMoveDir = (Vector2)stream.ReceiveNext();
+            networkLastMoveDir = (Vector2)stream.ReceiveNext();
         }
     }
 }
