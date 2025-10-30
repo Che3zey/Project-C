@@ -91,6 +91,8 @@ MonoBehaviour:
   cooldown: 1
   speed: 10
   lifetime: 3
+  damage: 10
+  knockbackForce: 6
   owner: {fileID: 0}
 --- !u!114 &1361209926958943846
 MonoBehaviour:

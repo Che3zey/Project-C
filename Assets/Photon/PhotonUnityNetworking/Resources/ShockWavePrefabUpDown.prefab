@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4931996003597387020}
   - component: {fileID: 4931996003597387021}
   - component: {fileID: 4931996003597387022}
+  - component: {fileID: 2207642711682853715}
   m_Layer: 0
   m_Name: ShockWavePrefabUpDown
   m_TagString: Untagged
@@ -114,6 +115,26 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &2207642711682853715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4931996003597387023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a320e37970e50c4ca9c573f7f5cc99e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spellName: Shockwave
+  manaCost: 45
+  cooldown: 5
+  speed: 6
+  lifetime: 0.4
+  damage: 20
+  knockbackForce: 8
+  owner: {fileID: 0}
 --- !u!1 &4931996003879208365
 GameObject:
   m_ObjectHideFlags: 0

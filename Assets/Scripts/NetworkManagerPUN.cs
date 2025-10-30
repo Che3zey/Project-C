@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using UnityEngine.UI;
 
 public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 {
@@ -17,12 +18,10 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     private Transform[] spawnPoints;
     private GameObject localPlayerInstance;
 
-    // To detect intentional disconnections (e.g., when going to main menu)
     private bool quittingToMenu = false;
 
     void Awake()
     {
-        // Singleton pattern
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -37,7 +36,6 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        // Auto-connect & join room when the manager appears
         if (!PhotonNetwork.IsConnected)
         {
             Debug.Log("🔌 Connecting to Photon...");
@@ -49,7 +47,6 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
         }
     }
 
-    // Called every time a new scene loads
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log($"📜 Scene Loaded: {scene.name}");
@@ -59,27 +56,23 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
             .OrderBy(t => t.name)
             .ToArray();
 
-        // If not connected, try again
         if (!PhotonNetwork.IsConnected)
         {
             PhotonNetwork.ConnectUsingSettings();
             return;
         }
 
-        // Auto-join a room if not already in one
         if (!PhotonNetwork.InRoom)
         {
             JoinOrCreateRoom();
             return;
         }
 
-        // Spawn player only if the scene has spawn points
         if (spawnPoints.Length > 0)
         {
             SpawnLocalPlayer();
         }
 
-        // Reattach camera if needed
         if (mainCamera == null)
             mainCamera = Camera.main;
 
@@ -108,7 +101,6 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     {
         Debug.Log($"🎮 Joined room: {PhotonNetwork.CurrentRoom.Name} | Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
 
-        // Spawn only if in a scene that can spawn
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint")
             .Select(go => go.transform)
             .OrderBy(t => t.name)
@@ -165,9 +157,28 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
             if (camFollow != null)
                 camFollow.SetTarget(localPlayerInstance);
         }
+
+        // 🔹 Multiplayer-safe mana slider assignment
+        SetupManaSlider(localPlayerInstance);
     }
 
-    // Called when quitting to main menu
+    private void SetupManaSlider(GameObject player)
+    {
+        if (player == null) return;
+        PlayerMana pm = player.GetComponent<PlayerMana>();
+        if (pm == null) return;
+
+        // Only assign for local player
+        if (!pm.photonView.IsMine) return;
+
+        // Find slider in scene (assumes one local HUD slider)
+        Slider slider = GameObject.FindObjectOfType<Slider>();
+        if (slider != null)
+        {
+            pm.SetupSlider(slider);
+        }
+    }
+
     public void QuitToMenu()
     {
         quittingToMenu = true;
@@ -182,13 +193,12 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
         if (!quittingToMenu)
         {
-            // Attempt auto-reconnect if it was an unexpected disconnection
             Debug.Log("Reconnecting to Photon...");
             PhotonNetwork.ConnectUsingSettings();
         }
         else
         {
-            quittingToMenu = false; // reset flag
+            quittingToMenu = false;
         }
     }
 }

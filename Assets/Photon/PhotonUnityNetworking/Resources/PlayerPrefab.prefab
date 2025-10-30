@@ -258,6 +258,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   equippedSpells: []
   fireOffsetDistance: 0.5
+  shockwavePrefabUpDown: {fileID: 4931996003597387023, guid: 6be2a9b96b6374d4f87666fec6df6e0c, type: 3}
+  shockwavePrefabSides: {fileID: 8522228963096530553, guid: 614c9bf09fa525641bf59bb88a4829f9, type: 3}
 --- !u!114 &7006301527895857204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,7 +272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c0d0f88fa3485749ba4d490f27c7274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 3
+  maxHealth: 100
 --- !u!114 &8352894261716301445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,6 +333,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   currentMana: 0
+  manaSlider: {fileID: 0}
 --- !u!1 &3415885528782223197
 GameObject:
   m_ObjectHideFlags: 0

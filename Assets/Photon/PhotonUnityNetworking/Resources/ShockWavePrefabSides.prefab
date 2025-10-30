@@ -331,6 +331,7 @@ GameObject:
   - component: {fileID: 8522228963096530556}
   - component: {fileID: 8522228963096530555}
   - component: {fileID: 8522228963096530554}
+  - component: {fileID: -7357198900881431199}
   m_Layer: 0
   m_Name: ShockWavePrefabSides
   m_TagString: Untagged
@@ -432,3 +433,23 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &-7357198900881431199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8522228963096530553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a320e37970e50c4ca9c573f7f5cc99e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spellName: Shockwave
+  manaCost: 45
+  cooldown: 5
+  speed: 6
+  lifetime: 0.4
+  damage: 20
+  knockbackForce: 8
+  owner: {fileID: 0}

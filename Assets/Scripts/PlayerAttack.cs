@@ -7,6 +7,10 @@ public class PlayerAttack : MonoBehaviourPun
     public Spell[] equippedSpells; // Max 2 spells equipped
     public float fireOffsetDistance = 0.5f; // distance from player center when casting
 
+    [Header("Shockwave Prefabs")]
+    public GameObject shockwavePrefabUpDown;
+    public GameObject shockwavePrefabSides;
+
     private float[] nextCastTime;
     private Vector2 lastMoveDir = Vector2.down; // default facing down
     private PlayerMovement movementScript;
@@ -18,6 +22,14 @@ public class PlayerAttack : MonoBehaviourPun
         anim = GetComponentInChildren<Animator>();
         if (anim == null)
             Debug.LogWarning("PlayerAttack: Animator not found in children!");
+
+        // Assign spells chosen in the shop (multiplayer-safe)
+        if (SpellSelectionManager.Instance != null)
+        {
+            equippedSpells = new Spell[2];
+            equippedSpells[0] = SpellSelectionManager.Instance.chosenSpell1;
+            equippedSpells[1] = SpellSelectionManager.Instance.chosenSpell2;
+        }
 
         // Initialize cooldown trackers
         nextCastTime = new float[equippedSpells.Length];
@@ -33,10 +45,10 @@ public class PlayerAttack : MonoBehaviourPun
             lastMoveDir = moveInput.normalized;
 
         // Example input: cast first spell with Space, second with LeftControl
-        if (equippedSpells.Length > 0 && Input.GetKeyDown(KeyCode.Space))
+        if (equippedSpells.Length > 0 && Input.GetKeyDown(KeyCode.J))
             TryCastSpell(0);
 
-        if (equippedSpells.Length > 1 && Input.GetKeyDown(KeyCode.LeftControl))
+        if (equippedSpells.Length > 1 && Input.GetKeyDown(KeyCode.K))
             TryCastSpell(1);
     }
 
@@ -63,16 +75,37 @@ public class PlayerAttack : MonoBehaviourPun
 
     void CastSpell(Spell spell)
     {
-        // Spawn the spell prefab at an offset
         Vector3 spawnPos = transform.position + (Vector3)(lastMoveDir * fireOffsetDistance);
 
-        GameObject go = PhotonNetwork.Instantiate(spell.gameObject.name, spawnPos, Quaternion.identity);
-        Fireball fb = go.GetComponent<Fireball>();
-        if (fb != null)
+        if (spell is Fireball)
         {
-            fb.SetDirection(lastMoveDir, gameObject);
+            GameObject go = PhotonNetwork.Instantiate(spell.gameObject.name, spawnPos, Quaternion.identity);
+            Fireball fb = go.GetComponent<Fireball>();
+            if (fb != null)
+                fb.SetDirection(lastMoveDir, gameObject);
         }
+        else if (spell is Shockwave)
+        {
+            if (shockwavePrefabUpDown == null || shockwavePrefabSides == null)
+            {
+                Debug.LogWarning("Shockwave prefabs not assigned!");
+                return;
+            }
 
-        // TODO: add other spell types here (melee, blockade, heal)
+            // Choose correct prefab based on player facing
+            GameObject prefabToUse = Mathf.Abs(lastMoveDir.y) > Mathf.Abs(lastMoveDir.x)
+                ? shockwavePrefabUpDown
+                : shockwavePrefabSides;
+
+            GameObject go = PhotonNetwork.Instantiate(prefabToUse.name, spawnPos, Quaternion.identity);
+            Shockwave wave = go.GetComponent<Shockwave>();
+            if (wave != null)
+                wave.SetDirection(lastMoveDir, gameObject);
+        }
+        else
+        {
+            // Future spells like heal, shield, etc.
+            spell.Cast(gameObject);
+        }
     }
 }

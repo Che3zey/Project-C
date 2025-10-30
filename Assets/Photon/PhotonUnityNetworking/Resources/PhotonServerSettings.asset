@@ -43,6 +43,7 @@ MonoBehaviour:
   - RPC_SetColor
   - RPC_SetOwner
   - RPC_UpdateRotation
+  - HandleTimeUp
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

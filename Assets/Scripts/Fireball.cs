@@ -6,6 +6,8 @@ public class Fireball : Spell
     [Header("Fireball Settings")]
     public float speed = 10f;
     public float lifetime = 2f;
+    public int damage = 1;
+    public float knockbackForce = 6f;
 
     [HideInInspector]
     public GameObject owner; // assigned via RPC
@@ -32,20 +34,15 @@ public class Fireball : Spell
         Destroy(gameObject, lifetime); // auto-destroy after lifetime
     }
 
-    /// <summary>
-    /// Called when spawned to set flight direction and owner
-    /// </summary>
     public void SetDirection(Vector2 dir, GameObject fireOwner)
     {
         direction = dir.normalized;
 
-        // Assign owner over network
         if (photonView.IsMine)
         {
             photonView.RPC(nameof(RPC_SetOwner), RpcTarget.AllBuffered, fireOwner.GetComponent<PhotonView>().ViewID);
         }
 
-        // Update rotation/flip locally and for all clients
         photonView.RPC(nameof(RPC_UpdateRotation), RpcTarget.AllBuffered, direction.x, direction.y);
     }
 
@@ -64,7 +61,7 @@ public class Fireball : Spell
 
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
         {
-            sr.flipX = direction.x < 0; // left = flipped
+            sr.flipX = direction.x < 0;
             transform.rotation = Quaternion.identity;
         }
         else
@@ -82,39 +79,34 @@ public class Fireball : Spell
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (owner == null) return; // safety check
-        if (other.gameObject == owner) return; // ignore hitting owner
+        if (owner == null) return;
+        if (other.gameObject == owner) return;
 
         PlayerHealth player = other.GetComponent<PlayerHealth>();
 
         if (player != null)
         {
-            // Only the owner applies damage
             PhotonView ownerPV = owner.GetComponent<PhotonView>();
             if (ownerPV != null && ownerPV.IsMine)
             {
                 Vector2 knockbackDir = (other.transform.position - owner.transform.position).normalized;
-                player.photonView.RPC("TakeDamage", RpcTarget.AllBuffered, 1, knockbackDir, 6f);
+                player.photonView.RPC("TakeDamage", RpcTarget.AllBuffered, damage, knockbackDir, knockbackForce);
             }
 
-            // Destroy fireball for all clients
             if (photonView.IsMine)
                 PhotonNetwork.Destroy(gameObject);
 
             return;
         }
 
-        // Destroy if it hits anything else solid
         if (!other.isTrigger && photonView.IsMine)
         {
             PhotonNetwork.Destroy(gameObject);
         }
     }
 
-    // Required override for base Spell
     public override void Cast(GameObject caster)
     {
-        // Fireball spawns are handled externally (from player's cast code)
-        // This method just exists for consistency
+        // Fireball spawns are handled externally
     }
 }
