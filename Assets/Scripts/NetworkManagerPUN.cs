@@ -150,6 +150,15 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
             if (attack != null)
             {
                 // Assign using prefab-based method
+                string spell1Name = loadout.spell1;
+                string spell2Name = loadout.spell2;
+
+                if (spell1Name == "Fireball") spell1Name = "FireballPrefab";
+                if (spell2Name == "Fireball") spell2Name = "FireballPrefab";
+
+                if (spell1Name == "Shockwave") spell1Name = "ShockWavePrefabUpDown";
+                if (spell2Name == "Shockwave") spell2Name = "ShockWavePrefabUpDown";
+                
                 attack.AssignSpellsByName(loadout.spell1, loadout.spell2);
 
                 // Debug the assigned prefabs

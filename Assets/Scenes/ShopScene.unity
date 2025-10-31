@@ -230,7 +230,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: FireballPrefab
+          m_StringArgument: Fireball
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &152838631
@@ -497,7 +497,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: ShockWavePrefabUpDown
+          m_StringArgument: Shockwave
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &533046926
@@ -848,10 +848,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chosenSpell1: 
   chosenSpell2: 
-  allSpells:
-  - FireballPrefab
-  - ShockWavePrefabUpDown
-  - ShockWavePrefabSides
+  availableSpellPrefabs:
+  - {fileID: 1581067121613960584, guid: 79d8c0b07a8b8de45bd7f4ff77fe8d80, type: 3}
+  - {fileID: 4931996003597387023, guid: 6be2a9b96b6374d4f87666fec6df6e0c, type: 3}
+  - {fileID: 8522228963096530553, guid: 614c9bf09fa525641bf59bb88a4829f9, type: 3}
 --- !u!4 &1221525182
 Transform:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SpellSelectionManager : MonoBehaviourPunCallbacks
 {
@@ -9,16 +10,16 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
     // Tracks all players' selections by ActorNumber
     private Dictionary<int, List<string>> playerSelections = new Dictionary<int, List<string>>();
 
-    // Local player's current selections
+    // Local player's current selections (names)
     public string chosenSpell1;
     public string chosenSpell2;
 
-    [Header("Available Spell Prefabs (Names Must Match)")]
-    public string[] allSpells = { "Fireball", "ShockwaveUpDown", "ShockwaveSides" };
+    [Header("Available Spell Prefabs (Names Must Match Spell Name field in Spell.cs)")]
+    public GameObject[] availableSpellPrefabs; // e.g. FireballPrefab, ShockWavePrefabUpDown, ShockWavePrefabSides
 
     private void Awake()
     {
-        // Singleton pattern
+        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -28,7 +29,7 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // Call when player selects a spell in the shop
+    // Called when the player selects a spell button in the shop
     public void ChooseSpell(string spellName)
     {
         if (string.IsNullOrEmpty(chosenSpell1))
@@ -50,7 +51,7 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         SaveLocalSelection();
     }
 
-    // Call when player unselects a spell in the shop
+    // Unselect a spell
     public void UnchooseSpell(string spellName)
     {
         if (chosenSpell1 == spellName) chosenSpell1 = null;
@@ -59,18 +60,17 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         SaveLocalSelection();
     }
 
-    // Ensures local player has a default loadout if they picked nothing
+    // ✅ Ensures default spells exist if none selected
     public void EnsureDefaults()
     {
         if (string.IsNullOrEmpty(chosenSpell1)) chosenSpell1 = "Fireball";
-        if (string.IsNullOrEmpty(chosenSpell2))
-            chosenSpell2 = (chosenSpell1 == "Fireball") ? "ShockwaveUpDown" : "Fireball";
+        if (string.IsNullOrEmpty(chosenSpell2)) chosenSpell2 = "Shockwave";
 
         SaveLocalSelection();
-        Debug.Log($"✅ Finalized Spells: {chosenSpell1}, {chosenSpell2}");
+        Debug.Log($"✅ Finalized spells: {chosenSpell1}, {chosenSpell2}");
     }
 
-    // Saves the local player's selections into the dictionary
+    // Saves this player’s chosen spell names to the dictionary
     private void SaveLocalSelection()
     {
         int id = PhotonNetwork.LocalPlayer.ActorNumber;
@@ -82,38 +82,52 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         if (!string.IsNullOrEmpty(chosenSpell2)) playerSelections[id].Add(chosenSpell2);
     }
 
-    // Returns the prefab GameObjects for the local player's selections
+    // ✅ Returns actual prefab references for the player's chosen spells
     public GameObject[] GetChosenSpellPrefabs()
     {
-        List<GameObject> spells = new List<GameObject>();
-        if (!string.IsNullOrEmpty(chosenSpell1))
+        EnsureDefaults();
+
+        List<GameObject> result = new List<GameObject>();
+
+        foreach (string spellName in new[] { chosenSpell1, chosenSpell2 })
         {
-            GameObject s1 = Resources.Load<GameObject>(chosenSpell1);
-            if (s1 != null) spells.Add(s1);
+            if (string.IsNullOrEmpty(spellName)) continue;
+
+            // Find the first prefab whose Spell component’s name matches
+            GameObject prefab = availableSpellPrefabs.FirstOrDefault(p =>
+            {
+                Spell spell = p.GetComponent<Spell>();
+                return spell != null && spell.spellName == spellName;
+            });
+
+            if (prefab != null)
+            {
+                result.Add(prefab);
+                Debug.Log($"🧩 Matched prefab for {spellName}: {prefab.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ No matching prefab found for {spellName}!");
+            }
         }
-        if (!string.IsNullOrEmpty(chosenSpell2))
-        {
-            GameObject s2 = Resources.Load<GameObject>(chosenSpell2);
-            if (s2 != null) spells.Add(s2);
-        }
-        return spells.ToArray();
+
+        return result.ToArray();
     }
 
-    // Struct for returning two selected spell names
+    // Struct used by NetworkManagerPUN to query loadouts by player ID
     public struct PlayerLoadout
     {
         public string spell1;
         public string spell2;
     }
 
-    // Returns the saved selections for a given player by ActorNumber
     public PlayerLoadout GetSelectedSpells(int playerId)
     {
         if (playerSelections.ContainsKey(playerId))
         {
             var list = playerSelections[playerId];
             string s1 = list.Count > 0 ? list[0] : "Fireball";
-            string s2 = list.Count > 1 ? list[1] : "ShockWaveUpDown";
+            string s2 = list.Count > 1 ? list[1] : "Shockwave";
             return new PlayerLoadout { spell1 = s1, spell2 = s2 };
         }
 

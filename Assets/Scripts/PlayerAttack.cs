@@ -34,9 +34,9 @@ public class PlayerAttack : MonoBehaviourPun
         if (equippedSpellPrefabs == null || equippedSpellPrefabs.Length == 0)
         {
             equippedSpellPrefabs = new GameObject[2];
-            equippedSpellPrefabs[0] = Resources.Load<GameObject>("Fireball");
-            equippedSpellPrefabs[1] = Resources.Load<GameObject>("ShockwaveUpDown");
-            Debug.Log("⚠️ Defaulted to Fireball + ShockwaveUpDown");
+            equippedSpellPrefabs[0] = Resources.Load<GameObject>("FireballPrefab");
+            equippedSpellPrefabs[1] = Resources.Load<GameObject>("ShockWavePrefabUpDown");
+            Debug.Log("⚠️ Defaulted to FireballPrefab + ShockWavePrefabUpDown");
         }
 
         nextCastTime = new float[equippedSpellPrefabs.Length];
@@ -116,8 +116,12 @@ public class PlayerAttack : MonoBehaviourPun
     {
         SpellSelectionManager.Instance.EnsureDefaults();
 
-        GameObject prefab1 = Resources.Load<GameObject>($"Spells/{spell1}");
-        GameObject prefab2 = Resources.Load<GameObject>($"Spells/{spell2}");
+        // ✅ Load directly from Resources folder (no "Spells/" prefix)
+        string prefabName1 = spell1 == "Fireball" ? "FireballPrefab" : "ShockWavePrefabUpDown";
+        string prefabName2 = spell2 == "Fireball" ? "FireballPrefab" : "ShockWavePrefabUpDown";
+
+        GameObject prefab1 = Resources.Load<GameObject>(prefabName1);
+        GameObject prefab2 = Resources.Load<GameObject>(prefabName2);
 
         equippedSpellPrefabs = new GameObject[2];
         equippedSpellPrefabs[0] = prefab1;
@@ -125,6 +129,6 @@ public class PlayerAttack : MonoBehaviourPun
 
         nextCastTime = new float[equippedSpellPrefabs.Length];
 
-        Debug.Log($"🪄 Equipped prefabs: {spell1} -> {prefab1}, {spell2} -> {prefab2}");
+        Debug.Log($"🪄 Equipped prefabs: {spell1} -> {(prefab1 ? prefab1.name : "❌ null")}, {spell2} -> {(prefab2 ? prefab2.name : "❌ null")}");
     }
 }
