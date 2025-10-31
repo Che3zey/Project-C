@@ -447,7 +447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spellName: Shockwave
   manaCost: 45
-  cooldown: 5
+  cooldown: 2
   speed: 6
   lifetime: 0.4
   damage: 20

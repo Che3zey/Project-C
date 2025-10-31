@@ -36,6 +36,6 @@ public class ShopUIManager : MonoBehaviour
         }
 
         Debug.Log($"Selected spells: {selected1}, {selected2}");
-        SpellSelectionManager.Instance.SetSelectedSpells(selected1, selected2);
+        
     }
 }

@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 285c0b5ff1b37f54295b3dda86ff3409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spellPrefab: {fileID: 5977470791116429077, guid: 79d8c0b07a8b8de45bd7f4ff77fe8d80, type: 3}
+  spellName: Fireball
 --- !u!114 &152838630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,7 +220,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 152838631}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 219905110}
+        m_TargetAssemblyTypeName: ShopUIManager, Assembly-CSharp
+        m_MethodName: SelectSpell
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: FireballPrefab
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &152838631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,6 +283,7 @@ GameObject:
   - component: {fileID: 219905108}
   - component: {fileID: 219905107}
   - component: {fileID: 219905106}
+  - component: {fileID: 219905110}
   m_Layer: 5
   m_Name: Shop
   m_TagString: Untagged
@@ -365,6 +378,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &219905110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219905105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb3bd95f698d384898ec0a68eda834a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &533046922
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,7 +443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 285c0b5ff1b37f54295b3dda86ff3409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spellPrefab: {fileID: -7357198900881431199, guid: 614c9bf09fa525641bf59bb88a4829f9, type: 3}
+  spellName: Shockwave
 --- !u!114 &533046925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -462,7 +487,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 533046926}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 219905110}
+        m_TargetAssemblyTypeName: ShopUIManager, Assembly-CSharp
+        m_MethodName: SelectSpell
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: ShockWavePrefabUpDown
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &533046926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -671,7 +708,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000030517578}
+  m_AnchoredPosition: {x: 0, y: 0.000061035156}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1114320631
@@ -779,6 +816,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1221525180
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1221525182}
+  - component: {fileID: 1221525181}
+  m_Layer: 0
+  m_Name: SpellSelectionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1221525181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221525180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1086b91351d22a64099b94077f0720de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chosenSpell1: 
+  chosenSpell2: 
+  allSpells:
+  - FireballPrefab
+  - ShockWavePrefabUpDown
+  - ShockWavePrefabSides
+--- !u!4 &1221525182
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221525180}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.3452065, y: 0.9974425, z: -0.057882156}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1383678689
 GameObject:

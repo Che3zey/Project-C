@@ -17,7 +17,6 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
     private Transform[] spawnPoints;
     private GameObject localPlayerInstance;
-
     private bool quittingToMenu = false;
 
     void Awake()
@@ -138,6 +137,33 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
         localPlayerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPos, Quaternion.identity);
         Debug.Log($"🧙 Spawned player at {spawnPos}");
 
+        // ✅ Ensure spells are finalized before applying
+        if (SpellSelectionManager.Instance != null)
+            SpellSelectionManager.Instance.EnsureDefaults();
+
+        // 🔹 Assign the selected spells (or defaults) to this player
+        var spellManager = SpellSelectionManager.Instance;
+        if (spellManager != null)
+        {
+            var loadout = spellManager.GetSelectedSpells(PhotonNetwork.LocalPlayer.ActorNumber);
+            PlayerAttack attack = localPlayerInstance.GetComponent<PlayerAttack>();
+            if (attack != null)
+            {
+                // Assign using prefab-based method
+                attack.AssignSpellsByName(loadout.spell1, loadout.spell2);
+
+                // Debug the assigned prefabs
+                if (attack.equippedSpellPrefabs != null)
+                {
+                    foreach (var s in attack.equippedSpellPrefabs)
+                        if (s != null)
+                            Debug.Log($"✅ Loaded Spell Prefab: {s.name}");
+                        else
+                            Debug.LogWarning("⚠️ Equipped spell prefab is null!");
+                }
+            }
+        }
+
         // Assign player color
         if (PlayerColorManager.Instance != null)
         {
@@ -158,7 +184,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
                 camFollow.SetTarget(localPlayerInstance);
         }
 
-        // 🔹 Multiplayer-safe mana slider assignment
+        // Multiplayer-safe mana slider setup
         SetupManaSlider(localPlayerInstance);
     }
 
@@ -168,15 +194,11 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
         PlayerMana pm = player.GetComponent<PlayerMana>();
         if (pm == null) return;
 
-        // Only assign for local player
         if (!pm.photonView.IsMine) return;
 
-        // Find slider in scene (assumes one local HUD slider)
         Slider slider = GameObject.FindObjectOfType<Slider>();
         if (slider != null)
-        {
             pm.SetupSlider(slider);
-        }
     }
 
     public void QuitToMenu()
