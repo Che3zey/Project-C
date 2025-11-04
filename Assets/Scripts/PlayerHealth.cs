@@ -62,6 +62,24 @@ public class PlayerHealth : MonoBehaviourPun
         movement.enabled = true;
         isKnocked = false;
     }
+    [PunRPC]
+    public void HealPlayer(int amount)
+    {
+        if (!photonView.IsMine) return;
+
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log($"{gameObject.name} healed for {amount}! Current HP: {currentHealth}");
+
+        // Update health bar if present
+        if (healthSlider != null)
+            healthSlider.value = (float)currentHealth / maxHealth;
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
 
     private void Die()
     {

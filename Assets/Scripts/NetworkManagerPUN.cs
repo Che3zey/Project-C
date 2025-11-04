@@ -158,6 +158,12 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
                 if (spell1Name == "Shockwave") spell1Name = "ShockWavePrefabUpDown";
                 if (spell2Name == "Shockwave") spell2Name = "ShockWavePrefabUpDown";
+
+                if (spell1Name == "HealingSpell") spell1Name = "HealingSpellPrefab";
+                if (spell2Name == "HealingSpell") spell2Name = "HealingSpellPrefab";
+
+                if (spell1Name == "Barrier") spell1Name = "BarrierSpellPrefab";
+                if (spell2Name == "Barrier") spell2Name = "BarrierSpellPrefab";
                 
                 attack.AssignSpellsByName(loadout.spell1, loadout.spell2);
 

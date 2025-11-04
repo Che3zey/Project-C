@@ -45,6 +45,9 @@ MonoBehaviour:
   - RPC_UpdateRotation
   - HandleTimeUp
   - NotifyDeathToMaster
+  - HealPlayer
+  - RPC_PlayEffect
+  - RPC_SetRotation
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

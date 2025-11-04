@@ -20,4 +20,18 @@ public class SceneLoader : MonoBehaviour
 
         SceneManager.LoadScene(sceneName);
     }
+
+    /// <summary>
+    /// Quits the game application.
+    /// Works in both Editor (stops Play Mode) and builds (closes the app).
+    /// </summary>
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }
