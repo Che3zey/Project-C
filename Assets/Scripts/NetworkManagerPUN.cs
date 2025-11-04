@@ -201,13 +201,14 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     {
         if (player == null) return;
         PlayerMana pm = player.GetComponent<PlayerMana>();
-        if (pm == null) return;
+        if (pm == null || !pm.photonView.IsMine) return;
 
-        if (!pm.photonView.IsMine) return;
-
-        Slider slider = GameObject.FindObjectOfType<Slider>();
-        if (slider != null)
-            pm.SetupSlider(slider);
+        // Make sure you have a slider tagged specifically as "ManaBar"
+        Slider manaSlider = GameObject.FindWithTag("ManaBar")?.GetComponent<Slider>();
+        if (manaSlider != null)
+            pm.SetupSlider(manaSlider);
+        else
+            Debug.LogWarning("Could not find a Slider with the tag 'ManaBar'");
     }
 
     public void QuitToMenu()

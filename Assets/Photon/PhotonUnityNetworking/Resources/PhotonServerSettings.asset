@@ -44,6 +44,7 @@ MonoBehaviour:
   - RPC_SetOwner
   - RPC_UpdateRotation
   - HandleTimeUp
+  - NotifyDeathToMaster
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
