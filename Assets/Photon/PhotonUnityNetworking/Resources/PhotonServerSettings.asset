@@ -48,6 +48,8 @@ MonoBehaviour:
   - HealPlayer
   - RPC_PlayEffect
   - RPC_SetRotation
+  - RPC_SetStartTime
+  - RPC_UpdateTimer
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

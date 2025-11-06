@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6457928385351013831}
   - component: {fileID: 6457928385351013828}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Right Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6457928385933358703}
   - component: {fileID: 6457928385933358700}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Middle Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,9 +182,9 @@ GameObject:
   - component: {fileID: 6457928386570750917}
   - component: {fileID: 6457928386570750916}
   - component: {fileID: 6457928386570750913}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BarrierSpellPrefab
-  m_TagString: Spell
+  m_TagString: Barrier
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -217,7 +217,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ObservedComponentsFoldoutOpen: 1
   Group: 0
-  prefixField: -1
+  prefixField: 0
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
@@ -295,11 +295,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74b3501795f21674c862d7935a0b95ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spellName: 
-  manaCost: 0
-  cooldown: 0
+  spellName: Barrier
+  manaCost: 30
+  cooldown: 5.5
   duration: 5
   spawnDistance: 2
+  owner: {fileID: 0}
 --- !u!1 &6457928386759808151
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,7 +311,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6457928386759808148}
   - component: {fileID: 6457928386759808149}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Left Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -41,8 +41,8 @@ public class PlayerHealth : MonoBehaviourPun
         if (!photonView.IsMine) return;
 
         currentHealth -= amount;
-        if (healthSlider != null)
-            healthSlider.value = currentHealth;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // ✅ prevent negative HP
+        UpdateHealthBar();
 
         if (currentHealth <= 0)
             Die();
@@ -62,17 +62,28 @@ public class PlayerHealth : MonoBehaviourPun
         movement.enabled = true;
         isKnocked = false;
     }
+
     [PunRPC]
     public void HealPlayer(int amount)
     {
         if (!photonView.IsMine) return;
 
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        Debug.Log($"{gameObject.name} healed for {amount}! Current HP: {currentHealth}");
+        int oldHealth = currentHealth;
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth); // ✅ capped at max
+        int actualHealed = currentHealth - oldHealth;
 
-        // Update health bar if present
+        Debug.Log($"{gameObject.name} healed for {actualHealed}! Current HP: {currentHealth}/{maxHealth}");
+
+        UpdateHealthBar();
+    }
+
+    private void UpdateHealthBar()
+    {
         if (healthSlider != null)
-            healthSlider.value = (float)currentHealth / maxHealth;
+        {
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth; // ✅ Slider expects absolute value, not normalized
+        }
     }
 
     public int GetCurrentHealth()
@@ -80,18 +91,16 @@ public class PlayerHealth : MonoBehaviourPun
         return currentHealth;
     }
 
-
     private void Die()
     {
         Debug.Log($"{gameObject.name} died!");
 
         if (photonView.IsMine)
         {
-            // Show the death UI before destroying player
             DeathUIManager.Instance.ShowDeathMessage("You died...");
 
-            // Optionally move camera to center of map
-            Camera.main.transform.position = new Vector3(0, 0, Camera.main.transform.position.z);
+            if (Camera.main != null)
+                Camera.main.transform.position = new Vector3(0, 0, Camera.main.transform.position.z);
 
             PhotonNetwork.Destroy(gameObject);
         }

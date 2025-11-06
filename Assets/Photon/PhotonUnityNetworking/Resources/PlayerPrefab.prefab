@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 471653936900360419}
   - component: {fileID: 471653936900360418}
   - component: {fileID: 4962397909401947892}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,7 +158,7 @@ GameObject:
   - component: {fileID: 8352894261716301445}
   - component: {fileID: 575438323643627736}
   - component: {fileID: 7397500591950515853}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PlayerPrefab
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -345,7 +345,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6565129909704318020}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

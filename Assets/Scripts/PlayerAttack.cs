@@ -46,6 +46,9 @@ public class PlayerAttack : MonoBehaviourPun
     {
         if (!photonView.IsMine) return;
 
+        // Block all input if player is paused
+        if (movementScript != null && movementScript.IsPaused()) return;
+
         // Track last facing direction
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (moveInput.magnitude > 0.1f)
@@ -107,17 +110,17 @@ public class PlayerAttack : MonoBehaviourPun
         }
         else if (spell is HealingSpell)
         {
-            // Healing spells are self-cast (no projectile)
-            HealingSpell heal = gameObject.AddComponent<HealingSpell>();
-            heal.Cast(gameObject);
-
-            // Optional animation trigger
-            if (anim != null)
-                anim.SetTrigger("CastHeal");
+            spawnPos = transform.position + Vector3.up * 1.2f; // slightly above player
+            GameObject go = PhotonNetwork.Instantiate("HealingSpellPrefab", spawnPos, Quaternion.identity);
+            HealingSpell heal = go.GetComponent<HealingSpell>();
+            if (heal != null)
+                heal.Cast(gameObject);
         }
-        else
+        else if (spell is BarrierSpell)
         {
-            spell.Cast(gameObject);
+            BarrierSpell barrier = prefab.GetComponent<BarrierSpell>();
+            if (barrier != null)
+                barrier.Cast(gameObject);
         }
     }
 
@@ -126,17 +129,13 @@ public class PlayerAttack : MonoBehaviourPun
     {
         SpellSelectionManager.Instance.EnsureDefaults();
 
-        // ✅ Determine prefab names
         string prefabName1 = GetPrefabName(spell1);
         string prefabName2 = GetPrefabName(spell2);
 
         GameObject prefab1 = Resources.Load<GameObject>(prefabName1);
         GameObject prefab2 = Resources.Load<GameObject>(prefabName2);
 
-        equippedSpellPrefabs = new GameObject[2];
-        equippedSpellPrefabs[0] = prefab1;
-        equippedSpellPrefabs[1] = prefab2;
-
+        equippedSpellPrefabs = new GameObject[2] { prefab1, prefab2 };
         nextCastTime = new float[equippedSpellPrefabs.Length];
 
         Debug.Log($"🪄 Equipped prefabs: {spell1} -> {(prefab1 ? prefab1.name : "❌ null")}, {spell2} -> {(prefab2 ? prefab2.name : "❌ null")}");
@@ -144,19 +143,13 @@ public class PlayerAttack : MonoBehaviourPun
 
     private string GetPrefabName(string spellName)
     {
-        switch (spellName)
+        return spellName switch
         {
-            case "Fireball":
-                return "FireballPrefab";
-            case "Shockwave":
-                return "ShockWavePrefabUpDown";
-            case "HealingSpell":
-                return "HealingSpellPrefab";
-            case "Barrier":
-                return "BarrierSpellPrefab";
-            default:
-                Debug.LogWarning($"Unknown spell name: {spellName}, defaulting to FireballPrefab");
-                return "FireballPrefab";
-        }
+            "Fireball" => "FireballPrefab",
+            "Shockwave" => "ShockWavePrefabUpDown",
+            "HealingSpell" => "HealingSpellPrefab",
+            "Barrier" => "BarrierSpellPrefab",
+            _ => "FireballPrefab"
+        };
     }
 }

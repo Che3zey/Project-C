@@ -2,7 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro; // only needed if you’re using TextMeshProUGUI
+using TMPro;
 
 public class ShopTimer : MonoBehaviourPun
 {
@@ -16,46 +16,54 @@ public class ShopTimer : MonoBehaviourPun
     void Start()
     {
         timer = selectionTime;
-        UpdateCountdownUI();
+        UpdateCountdownUI(timer);
     }
 
     void Update()
     {
-        // Only Master Client runs the timer logic
-        if (!PhotonNetwork.IsMasterClient || hasEnded)
-            return;
+        if (hasEnded) return;
 
-        timer -= Time.deltaTime;
-
-        if (timer > 0f)
+        // Only Master Client updates the timer
+        if (PhotonNetwork.IsMasterClient)
         {
-            UpdateCountdownUI();
-        }
-        else
-        {
-            // Prevent re-triggering
-            hasEnded = true;
-            timer = 0f;
-            UpdateCountdownUI();
+            timer -= Time.deltaTime;
 
-            // Ensure all players have spells
-            if (SpellSelectionManager.Instance != null)
-                SpellSelectionManager.Instance.EnsureDefaults();
+            if (timer > 0f)
+            {
+                // Broadcast the current timer to all players
+                photonView.RPC(nameof(RPC_UpdateTimer), RpcTarget.All, timer);
+            }
+            else
+            {
+                hasEnded = true;
+                timer = 0f;
+                photonView.RPC(nameof(RPC_UpdateTimer), RpcTarget.All, timer);
 
-            // Pick random scene once
-            int sceneIndex = Random.Range(0, 3);
-            string sceneName = "GameScene";
-            if (sceneIndex == 1) sceneName = "GameScene1";
-            else if (sceneIndex == 2) sceneName = "GameScene2";
+                // Ensure all players have spells
+                if (SpellSelectionManager.Instance != null)
+                    SpellSelectionManager.Instance.EnsureDefaults();
 
-            Debug.Log($"⏰ Time up! Loading {sceneName}");
-            PhotonNetwork.LoadLevel(sceneName);
+                // Pick random scene once
+                int sceneIndex = Random.Range(0, 3);
+                string sceneName = "GameScene";
+                if (sceneIndex == 1) sceneName = "GameScene1";
+                else if (sceneIndex == 2) sceneName = "GameScene2";
+
+                Debug.Log($"⏰ Time up! Loading {sceneName}");
+                PhotonNetwork.LoadLevel(sceneName);
+            }
         }
     }
 
-    void UpdateCountdownUI()
+    [PunRPC]
+    void RPC_UpdateTimer(float currentTime)
     {
-        int seconds = Mathf.CeilToInt(timer);
+        UpdateCountdownUI(currentTime);
+    }
+
+    void UpdateCountdownUI(float currentTime)
+    {
+        int seconds = Mathf.CeilToInt(currentTime);
         string text = $"Time Remaining: {seconds}s";
 
         if (countdownText != null)

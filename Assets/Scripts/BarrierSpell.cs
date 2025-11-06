@@ -8,137 +8,140 @@ public class BarrierSpell : Spell
     public float duration = 5f;          // How long the barrier lasts
     public float spawnDistance = 2f;     // How far in front of the caster it spawns
 
-    private bool isCasting = false;
+    [HideInInspector] public GameObject owner;
 
-    private void Awake()
+    void Awake()
     {
-        // Spell base data
         spellName = "Barrier";
         manaCost = 15f;
         cooldown = 6f;
     }
 
-    /// <summary>
-    /// Cast is called by PlayerAttack/Spell system.
-    /// Caster should be the player GameObject.
-    /// </summary>
     public override void Cast(GameObject caster)
     {
-        if (isCasting) return;
-        isCasting = true;
+        if (caster == null) return;
 
+        owner = caster;
+
+        // Only the owner should instantiate the networked barrier prefab
         PhotonView casterPV = caster.GetComponent<PhotonView>();
-        if (casterPV == null) return;
+        if (casterPV == null || !casterPV.IsMine) return;
 
-        // Only the local owner should spawn the networked barrier
-        if (!casterPV.IsMine) 
+        // Prevent multiple barriers for the same player:
+        // (we check instantiated barriers in the scene that carry BarrierSpell and match owner)
+        foreach (BarrierSpell b in FindObjectsOfType<BarrierSpell>())
         {
-            StartCoroutine(ResetCastingFlagAfter(cooldown));
-            return;
+            if (b.owner == caster)
+            {
+                Debug.Log("BarrierSpell: You already have an active barrier.");
+                return;
+            }
         }
 
-        // Determine look direction from Animator if possible
-        Vector2 lookDir = GetCastDirectionFromAnimator(caster);
-        if (lookDir == Vector2.zero)
-            lookDir = Vector2.right; // fallback
-
-        Vector3 spawnPos = caster.transform.position + (Vector3)lookDir.normalized * spawnDistance;
-
-        // Spawn barrier prefab (this script should be on the prefab)
-        GameObject barrierObj = PhotonNetwork.Instantiate(gameObject.name, spawnPos, Quaternion.identity);
-        if (barrierObj == null)
-        {
-            Debug.LogWarning("BarrierSpell: Failed to PhotonNetwork.Instantiate barrier prefab with name: " + gameObject.name);
-            StartCoroutine(ResetCastingFlagAfter(cooldown));
-            return;
-        }
-
-        BarrierSpell barrier = barrierObj.GetComponent<BarrierSpell>();
-        if (barrier == null)
-        {
-            Debug.LogWarning("BarrierSpell: Instantiated object doesn't have BarrierSpell component.");
-            StartCoroutine(ResetCastingFlagAfter(cooldown));
-            return;
-        }
-
-        // Calculate rotation angle (0 = horizontal, 90 = vertical)
-        float angle = CalculateAngleForDirection(lookDir);
-
-        // Set rotation on all clients so everyone sees aligned barrier
-        barrier.photonView.RPC(nameof(RPC_SetRotation), RpcTarget.AllBuffered, angle);
-
-        // Start lifetime on the networked object
-        barrier.StartCoroutine(barrier.LifetimeRoutine());
-
-        // Start cooldown on caster side
-        StartCoroutine(ResetCastingFlagAfter(cooldown));
-    }
-
-    // Read last facing direction from the caster's animator parameters set by PlayerMovement.
-    // This avoids touching PlayerMovement's private fields.
-    private Vector2 GetCastDirectionFromAnimator(GameObject caster)
-    {
+        // Determine facing direction using animator parameters (same logic as Fireball)
+        Vector2 lookDir = Vector2.right; // default
         Animator anim = caster.GetComponentInChildren<Animator>();
         if (anim != null)
         {
-            // These parameters exist in your movement code: LastMoveX / LastMoveY
-            float lx = 0f, ly = 0f;
-            // Protect against missing parameters by try/catch (GetFloat doesn't throw, but value will be 0)
-            lx = anim.GetFloat("LastMoveX");
-            ly = anim.GetFloat("LastMoveY");
-
+            float lx = anim.GetFloat("LastMoveX");
+            float ly = anim.GetFloat("LastMoveY");
             Vector2 v = new Vector2(lx, ly);
-            if (v.sqrMagnitude > 0.0001f) return v.normalized;
+            if (v.sqrMagnitude > 0.0001f)
+                lookDir = v.normalized;
         }
 
-        // As a fallback, try to query a PlayerMovement public property if you add one later.
-        // For now return Vector2.zero to allow caller to pick a default.
-        return Vector2.zero;
+        // Compute spawn position in front of the caster
+        Vector3 spawnPos = caster.transform.position + (Vector3)(lookDir * spawnDistance);
+
+        // Instantiate the barrier prefab across the network (prefab must be placed in Resources and have this BarrierSpell on it)
+        GameObject inst = PhotonNetwork.Instantiate(gameObject.name, spawnPos, Quaternion.identity);
+        if (inst == null)
+        {
+            Debug.LogWarning("BarrierSpell: Instantiate returned null for prefab: " + gameObject.name);
+            return;
+        }
+
+        // Configure the instantiated barrier (only the spawning owner needs to set owner & start lifetime)
+        BarrierSpell instSpell = inst.GetComponent<BarrierSpell>();
+        if (instSpell == null)
+        {
+            Debug.LogWarning("BarrierSpell: Instantiated object missing BarrierSpell component.");
+            return;
+        }
+
+        // Set the owner reference on the instantiated copy (so future checks know who it belongs to)
+        instSpell.owner = caster;
+
+        // Ensure the instantiated object has a blocking Collider2D and a static Rigidbody2D
+        SetupBarrierPhysics(inst);
+
+        // Determine rotation angle so barrier is *perpendicular* to facing direction:
+        // - If player faces left/right (horizontal dominates): barrier should be vertical → angle = 90
+        // - If player faces up/down (vertical dominates): barrier should be horizontal → angle = 0
+        float angle = (Mathf.Abs(lookDir.x) > Mathf.Abs(lookDir.y)) ? 90f : 0f;
+
+        // Set rotation on the instantiated object directly (it is networked, so transform will be visible to others).
+        // Use the instantiated object's photonView to call the RPC if you prefer strict syncing; setting transform on the instanced object is fine.
+        inst.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        // Start lifetime coroutine on the instantiated barrier (only the owner of the instantiated barrier should destroy it)
+        instSpell.StartCoroutine(instSpell.LifetimeRoutine());
     }
 
-    private float CalculateAngleForDirection(Vector2 dir)
+    // Ensures collider & rigidbody block physics
+    private void SetupBarrierPhysics(GameObject barrierGO)
     {
-        // If horizontal dominates => use horizontal (angle 0)
-        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
-            return 0f;
+        if (barrierGO == null) return;
+
+        // Ensure a Collider2D exists and is not a trigger
+        Collider2D col = barrierGO.GetComponent<Collider2D>();
+        if (col == null)
+        {
+            // Add a BoxCollider2D as a sensible default (adjust in prefab if needed)
+            col = barrierGO.AddComponent<BoxCollider2D>();
+        }
+        col.isTrigger = false;
+
+        // Ensure it has a Rigidbody2D set to Static so it blocks dynamic rigidbodies (player/projectiles)
+        Rigidbody2D rb = barrierGO.GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            rb = barrierGO.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Static;
+        }
         else
-            return 90f; // vertical barrier
+        {
+            rb.bodyType = RigidbodyType2D.Static;
+        }
+
+        // Optional: set a layer so you can control Layer Collision Matrix (recommended)
+        // barrierGO.layer = LayerMask.NameToLayer("Barrier"); // create and configure "Barrier" layer in Unity editor
     }
 
-    [PunRPC]
-    private void RPC_SetRotation(float angle)
-    {
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
-    }
-
+    // Lifetime coroutine that destroys networked object after duration
     private IEnumerator LifetimeRoutine()
     {
         yield return new WaitForSeconds(duration);
 
-        // Only the owner of the barrier should call Destroy (Photon ensures it removes network object)
         PhotonView pv = GetComponent<PhotonView>();
         if (pv != null && pv.IsMine)
+        {
             PhotonNetwork.Destroy(gameObject);
+        }
         else if (pv == null)
+        {
             Destroy(gameObject);
+        }
     }
 
-    private IEnumerator ResetCastingFlagAfter(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        isCasting = false;
-    }
-
-    // Optional collision behavior to block/destroy spells that hit the barrier
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // If the incoming object is a spell projectile and is owned by someone, optionally destroy it.
-        // Tag your projectiles with "Spell" or check component.
-        if (collision.gameObject.CompareTag("Spell"))
+        // Optional: destroy incoming spell projectiles (tagged "Spell")
+        if (collision.gameObject.CompareTag("Fireball"))
         {
-            PhotonView spellPV = collision.gameObject.GetComponent<PhotonView>();
-            if (spellPV != null && spellPV.IsMine)
-                PhotonNetwork.Destroy(spellPV.gameObject);
+            PhotonView pv = collision.gameObject.GetComponent<PhotonView>();
+            if (pv != null && pv.IsMine)
+                PhotonNetwork.Destroy(pv.gameObject);
         }
     }
 }

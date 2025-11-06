@@ -31,6 +31,13 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
         PhotonNetwork.AutomaticallySyncScene = true;
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (PlayerPrefs.GetInt("ReturningToMainMenu", 0) == 1)
+        {
+            PlayerPrefs.DeleteKey("ReturningToMainMenu");
+            Debug.Log("🚫 Skipping auto Photon reconnect (returned to Main Menu).");
+            return;
+        }
     }
 
     void Start()

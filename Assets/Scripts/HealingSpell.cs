@@ -4,70 +4,73 @@ using Photon.Pun;
 public class HealingSpell : Spell
 {
     [Header("Healing Settings")]
-    public int healAmount = 20;         // how much health to restore
-    public float healRadius = 1.5f;     // optional (if you want AoE later)
-    public float duration = 1.5f;       // lifetime for the animation object
+    public int healAmount = 20;            // How much to heal
+    public float duration = 1f;            // Lifetime of the healing effect
+    public float verticalOffset = 1.2f;    // How high above player to spawn
 
     [HideInInspector]
     public GameObject owner;
 
-    private Animator anim;
+    private SpriteRenderer sr;
 
     void Awake()
     {
-        anim = GetComponentInChildren<Animator>();
-
         // Base Spell setup
-        spellName = "Healing";      // must match name in shop system
+        spellName = "HealingSpell";
         manaCost = 15f;
-        cooldown = 4f;
+        cooldown = 3f;
+
+        sr = GetComponentInChildren<SpriteRenderer>();
+        if (sr == null)
+            Debug.LogWarning("HealingSpell: No SpriteRenderer found!");
     }
 
     void Start()
     {
-        // Auto destroy after animation ends
+        // Auto-destroy after duration
         Destroy(gameObject, duration);
     }
 
+    /// <summary>
+    /// Called by PlayerAttack via PhotonNetwork.Instantiate
+    /// </summary>
     public override void Cast(GameObject caster)
     {
-        if (caster == null) return;
-
         owner = caster;
 
-        if (!caster.TryGetComponent(out PlayerHealth health))
+        if (owner == null)
         {
-            Debug.LogWarning("HealingSpell: No PlayerHealth found on caster!");
+            Debug.LogWarning("HealingSpell: caster is null!");
             return;
         }
 
-        // Only the local owner handles healing
-        PhotonView casterPV = caster.GetComponent<PhotonView>();
-        if (casterPV != null && casterPV.IsMine)
+        if (photonView.IsMine)
         {
-            int newHealth = Mathf.Min(health.GetCurrentHealth() + healAmount, health.maxHealth);
-            int healDiff = newHealth - health.GetCurrentHealth();
+            // Heal the player via RPC
+            PlayerHealth playerHealth = caster.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.photonView.RPC("HealPlayer", RpcTarget.AllBuffered, healAmount);
+            }
 
-            // Heal via RPC so everyone sees consistent health
-            health.photonView.RPC("HealPlayer", RpcTarget.AllBuffered, healDiff);
-
-            // Spawn healing animation effect for all players
-            photonView.RPC(nameof(RPC_PlayEffect), RpcTarget.AllBuffered, casterPV.ViewID);
+            // Position this healing prefab above the player
+            transform.position = caster.transform.position + Vector3.up * verticalOffset;
         }
     }
 
-    [PunRPC]
-    void RPC_PlayEffect(int casterViewID)
+    /// <summary>
+    /// Optional: call this if you want the effect to follow the player during the animation
+    /// </summary>
+    void Update()
     {
-        PhotonView casterPV = PhotonView.Find(casterViewID);
-        if (casterPV == null) return;
+        if (owner != null)
+        {
+            transform.position = owner.transform.position + Vector3.up * verticalOffset;
+        }
+    }
 
-        Transform casterT = casterPV.transform;
-
-        // Move spell to caster's position for visual effect
-        transform.position = casterT.position;
-
-        if (anim != null)
-            anim.SetTrigger("Cast");
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Healing spell has no collisions; destroy on lifetime expiry only
     }
 }

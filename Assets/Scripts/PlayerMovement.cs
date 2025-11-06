@@ -16,7 +16,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
 
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down; // Default facing down
-
     private bool isPaused = false;
 
     // Synced variables for remote players
@@ -44,19 +43,18 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     // 🔹 Called every time a scene is loaded
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Try to find a new pause menu in the current scene
         if (pauseMenu == null)
         {
-            GameObject foundMenu = GameObject.Find("PauseMenu");
-            if (foundMenu != null)
+            GameObject uiManager = GameObject.Find("UIManager");
+            if (uiManager != null)
             {
-                pauseMenu = foundMenu;
-                pauseMenu.SetActive(false);
-                Debug.Log($"✅ Pause menu found in scene: {scene.name}");
-            }
-            else
-            {
-                Debug.Log($"⚠️ No PauseMenu found in scene: {scene.name}");
+                Transform pauseTransform = uiManager.transform.Find("PauseMenu");
+                if (pauseTransform != null)
+                {
+                    pauseMenu = pauseTransform.gameObject;
+                    pauseMenu.SetActive(false);
+                    Debug.Log($"✅ Pause menu found under UIManager in scene: {scene.name}");
+                }
             }
         }
     }
@@ -64,6 +62,10 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     void Update()
     {
         if (!photonView.IsMine) return;
+
+        // 🔹 Continually retry finding pause menu if it doesn’t exist yet
+        if (pauseMenu == null)
+            TryFindPauseMenu();
 
         HandlePauseToggle();
 
@@ -81,7 +83,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
     void FixedUpdate()
     {
         if (!photonView.IsMine || isPaused) return;
-
         rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
     }
 
@@ -103,17 +104,39 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         {
             isPaused = !isPaused;
 
+            // Try to find the pause menu dynamically under UIManager
             if (pauseMenu == null)
             {
-                // Try to find one dynamically in case it just loaded
-                pauseMenu = GameObject.Find("PauseMenu");
+                GameObject uiManager = GameObject.Find("UIManager");
+                if (uiManager != null)
+                {
+                    Transform pauseTransform = uiManager.transform.Find("PauseMenu");
+                    if (pauseTransform != null)
+                        pauseMenu = pauseTransform.gameObject;
+                }
             }
 
             if (pauseMenu != null)
                 pauseMenu.SetActive(isPaused);
 
+            // Freeze player movement and optionally cursor
             Cursor.visible = isPaused;
             Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
+        }
+    }
+
+    // 🔹 Tries to locate the pause menu by tag or name
+    private void TryFindPauseMenu()
+    {
+        GameObject foundMenu = GameObject.FindWithTag("PauseMenu");
+        if (foundMenu == null)
+            foundMenu = GameObject.Find("PauseMenu");
+
+        if (foundMenu != null)
+        {
+            pauseMenu = foundMenu;
+            pauseMenu.SetActive(false);
+            Debug.Log($"✅ Found PauseMenu in scene: {SceneManager.GetActiveScene().name}");
         }
     }
 
