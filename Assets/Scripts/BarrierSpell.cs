@@ -63,7 +63,7 @@ public class BarrierSpell : Spell
 
     private Vector2 GetFacingDirection(GameObject caster)
     {
-        // Derive from Animator parameters (same as Fireball)
+        // Derive from Animator parameters
         Animator anim = caster.GetComponentInChildren<Animator>();
         if (anim != null)
         {

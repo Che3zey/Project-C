@@ -49,7 +49,7 @@ public class ShopTimer : MonoBehaviourPun
                 if (sceneIndex == 1) sceneName = "GameScene1";
                 else if (sceneIndex == 2) sceneName = "GameScene2";
 
-                Debug.Log($"⏰ Time up! Loading {sceneName}");
+                Debug.Log($"Time up! Loading {sceneName}");
                 PhotonNetwork.LoadLevel(sceneName);
             }
         }

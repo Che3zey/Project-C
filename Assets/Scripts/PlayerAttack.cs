@@ -36,7 +36,7 @@ public class PlayerAttack : MonoBehaviourPun
             equippedSpellPrefabs = new GameObject[2];
             equippedSpellPrefabs[0] = Resources.Load<GameObject>("FireballPrefab");
             equippedSpellPrefabs[1] = Resources.Load<GameObject>("ShockWavePrefabUpDown");
-            Debug.Log("⚠️ Defaulted to FireballPrefab + ShockWavePrefabUpDown");
+            Debug.Log("Defaulted to FireballPrefab + ShockWavePrefabUpDown");
         }
 
         nextCastTime = new float[equippedSpellPrefabs.Length];
@@ -124,7 +124,7 @@ public class PlayerAttack : MonoBehaviourPun
         }
     }
 
-    // ✅ Called from NetworkManager when player spawns
+    //  Called from NetworkManager when player spawns
     public void AssignSpellsByName(string spell1, string spell2)
     {
         SpellSelectionManager.Instance.EnsureDefaults();
@@ -138,7 +138,7 @@ public class PlayerAttack : MonoBehaviourPun
         equippedSpellPrefabs = new GameObject[2] { prefab1, prefab2 };
         nextCastTime = new float[equippedSpellPrefabs.Length];
 
-        Debug.Log($"🪄 Equipped prefabs: {spell1} -> {(prefab1 ? prefab1.name : "❌ null")}, {spell2} -> {(prefab2 ? prefab2.name : "❌ null")}");
+        Debug.Log($"Equipped prefabs: {spell1} -> {(prefab1 ? prefab1.name : "null")}, {spell2} -> {(prefab2 ? prefab2.name : "null")}");
     }
 
     private string GetPrefabName(string spellName)

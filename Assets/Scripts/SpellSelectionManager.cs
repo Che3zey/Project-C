@@ -28,9 +28,9 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    /// <summary>
-    /// Clears spell selections for the local player (or all players)
-    /// </summary>
+    
+    // Clears spell selections for the local player (or all players)
+    
     public void ClearSelections(bool onlyLocalPlayer = true)
     {
         if (onlyLocalPlayer)
@@ -49,37 +49,37 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
             chosenSpell2 = null;
         }
 
-        Debug.Log("🧹 Spell selections cleared.");
+        Debug.Log("Spell selections cleared.");
     }
 
-    /// <summary>
-    /// Player chooses a spell (prevents duplicates)
-    /// </summary>
+    
+    // Player chooses a spell (prevents duplicates)
+    
     public void ChooseSpell(string spellName)
     {
         // Prevent duplicate selection
         if (spellName == chosenSpell1 || spellName == chosenSpell2)
         {
-            Debug.Log("🔁 Spell already selected, ignoring.");
+            Debug.Log("Spell already selected, ignoring.");
             return;
         }
 
         if (string.IsNullOrEmpty(chosenSpell1))
         {
             chosenSpell1 = spellName;
-            Debug.Log($"🧙 Spell 1 chosen: {spellName}");
+            Debug.Log($"Spell 1 chosen: {spellName}");
         }
         else if (string.IsNullOrEmpty(chosenSpell2))
         {
             chosenSpell2 = spellName;
-            Debug.Log($"🔥 Spell 2 chosen: {spellName}");
+            Debug.Log($"Spell 2 chosen: {spellName}");
         }
         else
         {
             // Replace the oldest spell (chosenSpell1) with the new one
             chosenSpell1 = chosenSpell2;
             chosenSpell2 = spellName;
-            Debug.Log($"🔁 Replaced oldest spell. New selections: {chosenSpell1}, {chosenSpell2}");
+            Debug.Log($"Replaced oldest spell. New selections: {chosenSpell1}, {chosenSpell2}");
         }
 
         SaveLocalSelection();
@@ -99,7 +99,7 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         if (string.IsNullOrEmpty(chosenSpell2)) chosenSpell2 = "Shockwave";
 
         SaveLocalSelection();
-        Debug.Log($"✅ Finalized spells: {chosenSpell1}, {chosenSpell2}");
+        Debug.Log($"Finalized spells: {chosenSpell1}, {chosenSpell2}");
     }
 
     private void SaveLocalSelection()
@@ -133,7 +133,7 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
             if (prefab != null)
                 result.Add(prefab);
             else
-                Debug.LogWarning($"⚠️ No prefab found for {spellName}");
+                Debug.LogWarning($"No prefab found for {spellName}");
         }
 
         return result.ToArray();

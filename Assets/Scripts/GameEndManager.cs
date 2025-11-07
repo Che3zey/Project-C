@@ -105,7 +105,7 @@ public class GameEndManager : MonoBehaviourPunCallbacks
     {
         if (hasEnded) return;
 
-        Debug.Log($"🏁 Match ending: {reason}");
+        Debug.Log($"Match ending: {reason}");
 
         if (checkCoroutine != null)
             StopCoroutine(checkCoroutine);
@@ -129,19 +129,19 @@ public class GameEndManager : MonoBehaviourPunCallbacks
 
         hasEnded = true;
 
-        Debug.Log($"➡️ Match Ended: {reason}");
+        Debug.Log($"Match Ended: {reason}");
         StartCoroutine(LoadShopScene());
     }
 
     private IEnumerator LoadShopScene()
     {
-        Debug.Log($"🕒 Loading ShopScene in 1.5 seconds... Master? {PhotonNetwork.IsMasterClient}");
+        Debug.Log($"Loading ShopScene in 1.5 seconds... Master? {PhotonNetwork.IsMasterClient}");
         yield return new WaitForSeconds(1.5f);
 
         // Only master actually loads the scene; others sync automatically
         if (PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("🟢 Master loading ShopScene now!");
+            Debug.Log("Master loading ShopScene now!");
             PhotonNetwork.LoadLevel("ShopScene");
         }
     }

@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
                 {
                     pauseMenu = pauseTransform.gameObject;
                     pauseMenu.SetActive(false);
-                    Debug.Log($"✅ Pause menu found under UIManager in scene: {scene.name}");
+                    Debug.Log($"Pause menu found under UIManager in scene: {scene.name}");
                 }
             }
         }
@@ -136,7 +136,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable
         {
             pauseMenu = foundMenu;
             pauseMenu.SetActive(false);
-            Debug.Log($"✅ Found PauseMenu in scene: {SceneManager.GetActiveScene().name}");
+            Debug.Log($"Found PauseMenu in scene: {SceneManager.GetActiveScene().name}");
         }
     }
 

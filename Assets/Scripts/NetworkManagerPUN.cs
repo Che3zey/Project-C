@@ -35,7 +35,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
         if (PlayerPrefs.GetInt("ReturningToMainMenu", 0) == 1)
         {
             PlayerPrefs.DeleteKey("ReturningToMainMenu");
-            Debug.Log("🚫 Skipping auto Photon reconnect (returned to Main Menu).");
+            Debug.Log("Skipping auto Photon reconnect (returned to Main Menu).");
             return;
         }
     }
@@ -44,7 +44,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected)
         {
-            Debug.Log("🔌 Connecting to Photon...");
+            Debug.Log("Connecting to Photon...");
             PhotonNetwork.ConnectUsingSettings();
         }
         else if (!PhotonNetwork.InRoom)
@@ -55,7 +55,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"📜 Scene Loaded: {scene.name}");
+        Debug.Log($"Scene Loaded: {scene.name}");
 
         // Spawn points, player, camera setup...
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint")
@@ -90,45 +90,45 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
                 camFollow.SetTarget(localPlayerInstance);
         }
 
-        // 🖱 Cursor visibility and lock mode based on scene
+        //  Cursor visibility and lock mode based on scene
         UpdateCursorForScene(scene.name);
     }
 
-    /// <summary>
-    /// Shows cursor in shop, hides and locks it in gameplay
-    /// </summary>
+    
+    // Shows cursor in shop, hides and locks it in gameplay
+    
     private void UpdateCursorForScene(string sceneName)
     {
         if (sceneName == "ShopScene" || sceneName == "MainMenu")
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            Debug.Log("🖱 Cursor unlocked and visible (Shop/MainMenu).");
+            Debug.Log("Cursor unlocked and visible (Shop/MainMenu).");
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            Debug.Log("🖱 Cursor locked and hidden (Gameplay).");
+            Debug.Log("Cursor locked and hidden (Gameplay).");
         }
     }
 
     private void JoinOrCreateRoom()
     {
-        Debug.Log("🏠 Joining or creating room...");
+        Debug.Log("Joining or creating room...");
         RoomOptions options = new RoomOptions { MaxPlayers = 4 };
         PhotonNetwork.JoinOrCreateRoom("WizardDuelRoom", options, TypedLobby.Default);
     }
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("✅ Connected to Photon Master Server");
+        Debug.Log("Connected to Photon Master Server");
         JoinOrCreateRoom();
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log($"🎮 Joined room: {PhotonNetwork.CurrentRoom.Name} | Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
+        Debug.Log($"Joined room: {PhotonNetwork.CurrentRoom.Name} | Players: {PhotonNetwork.CurrentRoom.PlayerCount}");
 
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint")
             .Select(go => go.transform)
@@ -143,13 +143,13 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     {
         if (playerPrefab == null)
         {
-            Debug.LogError("❌ Player prefab not assigned!");
+            Debug.LogError("Player prefab not assigned!");
             return;
         }
 
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            Debug.LogWarning("⚠️ No spawn points in this scene.");
+            Debug.LogWarning("No spawn points in this scene.");
             return;
         }
 
@@ -165,13 +165,13 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
 
         Vector3 spawnPos = spawnPoints[spawnIndex].position;
         localPlayerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPos, Quaternion.identity);
-        Debug.Log($"🧙 Spawned player at {spawnPos}");
+        Debug.Log($"Spawned player at {spawnPos}");
 
-        // ✅ Ensure spells are finalized before applying
+        //Ensure spells are finalized before applying
         if (SpellSelectionManager.Instance != null)
             SpellSelectionManager.Instance.EnsureDefaults();
 
-        // 🔹 Assign the selected spells (or defaults) to this player
+        //Assign the selected spells (or defaults) to this player
         var spellManager = SpellSelectionManager.Instance;
         if (spellManager != null)
         {
@@ -202,9 +202,9 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
                 {
                     foreach (var s in attack.equippedSpellPrefabs)
                         if (s != null)
-                            Debug.Log($"✅ Loaded Spell Prefab: {s.name}");
+                            Debug.Log($"Loaded Spell Prefab: {s.name}");
                         else
-                            Debug.LogWarning("⚠️ Equipped spell prefab is null!");
+                            Debug.LogWarning("Equipped spell prefab is null!");
                 }
             }
         }
@@ -239,7 +239,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
         PlayerMana pm = player.GetComponent<PlayerMana>();
         if (pm == null || !pm.photonView.IsMine) return;
 
-        // Make sure you have a slider tagged specifically as "ManaBar"
+        
         Slider manaSlider = GameObject.FindWithTag("ManaBar")?.GetComponent<Slider>();
         if (manaSlider != null)
             pm.SetupSlider(manaSlider);
@@ -250,14 +250,14 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     public void QuitToMenu()
     {
         quittingToMenu = true;
-        Debug.Log("🏁 Returning to Main Menu...");
+        Debug.Log("Returning to Main Menu...");
         PhotonNetwork.Disconnect();
         SceneManager.LoadScene("MainMenu");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        Debug.Log($"🔴 Disconnected from Photon: {cause}");
+        Debug.Log($"Disconnected from Photon: {cause}");
 
         if (!quittingToMenu)
         {

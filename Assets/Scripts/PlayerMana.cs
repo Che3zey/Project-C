@@ -53,9 +53,9 @@ public class PlayerMana : MonoBehaviourPun
         }
     }
 
-    /// <summary>
-    /// Attempt to spend mana. Returns true if successful.
-    /// </summary>
+    
+    // Attempt to spend mana. Returns true if successful.
+    
     public bool UseMana(float amount)
     {
         if (!photonView.IsMine) return false;
@@ -67,9 +67,9 @@ public class PlayerMana : MonoBehaviourPun
         return true;
     }
 
-    /// <summary>
-    /// Instantly refill mana to max.
-    /// </summary>
+    
+    // Instantly refill mana to max.
+    
     public void RefillMana()
     {
         currentMana = maxMana;
@@ -85,9 +85,9 @@ public class PlayerMana : MonoBehaviourPun
             manaSlider.value = normalized;
     }
 
-    /// <summary>
-    /// Assigns the UI slider for the local player after spawn.
-    /// </summary>
+    
+    // Assigns the UI slider for the local player after spawn.
+    
     public void SetupSlider(Slider slider)
     {
         if (!photonView.IsMine) return;

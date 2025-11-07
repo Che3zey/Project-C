@@ -24,7 +24,7 @@ public class ShopUIManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        Debug.Log("🛍 Shop initialized. Cursor unlocked, selections cleared.");
+        Debug.Log("Shop initialized. Cursor unlocked, selections cleared.");
     }
 
     public void SelectSpell(string spellName)
@@ -32,7 +32,7 @@ public class ShopUIManager : MonoBehaviour
         // Prevent selecting the same spell twice
         if (selected1 == spellName || selected2 == spellName)
         {
-            Debug.Log("🔁 Spell already selected, ignoring.");
+            Debug.Log("Spell already selected, ignoring.");
             return;
         }
 

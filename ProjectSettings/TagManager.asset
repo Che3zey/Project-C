@@ -48,3 +48,24 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 54149751
+    locked: 0
+  - name: Floor
+    uniqueID: 72246975
+    locked: 0
+  - name: DecoUnder
+    uniqueID: 3180716077
+    locked: 0
+  - name: Players and Spells
+    uniqueID: 2031845197
+    locked: 0
+  - name: Wall
+    uniqueID: 2276027035
+    locked: 0
+  - name: DecoOver
+    uniqueID: 913965773
+    locked: 0
+  - name: Collisions
+    uniqueID: 785093451
+    locked: 0
