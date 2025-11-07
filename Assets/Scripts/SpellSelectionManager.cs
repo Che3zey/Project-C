@@ -10,16 +10,15 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
     // Tracks all players' selections by ActorNumber
     private Dictionary<int, List<string>> playerSelections = new Dictionary<int, List<string>>();
 
-    // Local player's current selections (names)
+    // Local player's current selections
     public string chosenSpell1;
     public string chosenSpell2;
 
     [Header("Available Spell Prefabs (Names Must Match Spell Name field in Spell.cs)")]
-    public GameObject[] availableSpellPrefabs; // e.g. FireballPrefab, ShockWavePrefabUpDown, ShockWavePrefabSides
+    public GameObject[] availableSpellPrefabs;
 
     private void Awake()
     {
-        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -29,9 +28,42 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // Called when the player selects a spell button in the shop
+    /// <summary>
+    /// Clears spell selections for the local player (or all players)
+    /// </summary>
+    public void ClearSelections(bool onlyLocalPlayer = true)
+    {
+        if (onlyLocalPlayer)
+        {
+            int id = PhotonNetwork.LocalPlayer.ActorNumber;
+            if (playerSelections.ContainsKey(id))
+                playerSelections[id].Clear();
+
+            chosenSpell1 = null;
+            chosenSpell2 = null;
+        }
+        else
+        {
+            playerSelections.Clear();
+            chosenSpell1 = null;
+            chosenSpell2 = null;
+        }
+
+        Debug.Log("🧹 Spell selections cleared.");
+    }
+
+    /// <summary>
+    /// Player chooses a spell (prevents duplicates)
+    /// </summary>
     public void ChooseSpell(string spellName)
     {
+        // Prevent duplicate selection
+        if (spellName == chosenSpell1 || spellName == chosenSpell2)
+        {
+            Debug.Log("🔁 Spell already selected, ignoring.");
+            return;
+        }
+
         if (string.IsNullOrEmpty(chosenSpell1))
         {
             chosenSpell1 = spellName;
@@ -39,19 +71,20 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         }
         else if (string.IsNullOrEmpty(chosenSpell2))
         {
-            if (chosenSpell1 == spellName) return; // prevent duplicates
             chosenSpell2 = spellName;
             Debug.Log($"🔥 Spell 2 chosen: {spellName}");
         }
         else
         {
-            Debug.Log("⚠️ Already have two spells selected!");
+            // Replace the oldest spell (chosenSpell1) with the new one
+            chosenSpell1 = chosenSpell2;
+            chosenSpell2 = spellName;
+            Debug.Log($"🔁 Replaced oldest spell. New selections: {chosenSpell1}, {chosenSpell2}");
         }
 
         SaveLocalSelection();
     }
 
-    // Unselect a spell
     public void UnchooseSpell(string spellName)
     {
         if (chosenSpell1 == spellName) chosenSpell1 = null;
@@ -60,7 +93,6 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         SaveLocalSelection();
     }
 
-    // ✅ Ensures default spells exist if none selected
     public void EnsureDefaults()
     {
         if (string.IsNullOrEmpty(chosenSpell1)) chosenSpell1 = "Fireball";
@@ -70,7 +102,6 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         Debug.Log($"✅ Finalized spells: {chosenSpell1}, {chosenSpell2}");
     }
 
-    // Saves this player’s chosen spell names to the dictionary
     private void SaveLocalSelection()
     {
         int id = PhotonNetwork.LocalPlayer.ActorNumber;
@@ -79,10 +110,10 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
 
         playerSelections[id].Clear();
         if (!string.IsNullOrEmpty(chosenSpell1)) playerSelections[id].Add(chosenSpell1);
-        if (!string.IsNullOrEmpty(chosenSpell2)) playerSelections[id].Add(chosenSpell2);
+        if (!string.IsNullOrEmpty(chosenSpell2) && chosenSpell2 != chosenSpell1)
+            playerSelections[id].Add(chosenSpell2);
     }
 
-    // ✅ Returns actual prefab references for the player's chosen spells
     public GameObject[] GetChosenSpellPrefabs()
     {
         EnsureDefaults();
@@ -93,7 +124,6 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
         {
             if (string.IsNullOrEmpty(spellName)) continue;
 
-            // Find the first prefab whose Spell component’s name matches
             GameObject prefab = availableSpellPrefabs.FirstOrDefault(p =>
             {
                 Spell spell = p.GetComponent<Spell>();
@@ -101,20 +131,14 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
             });
 
             if (prefab != null)
-            {
                 result.Add(prefab);
-                Debug.Log($"🧩 Matched prefab for {spellName}: {prefab.name}");
-            }
             else
-            {
-                Debug.LogWarning($"⚠️ No matching prefab found for {spellName}!");
-            }
+                Debug.LogWarning($"⚠️ No prefab found for {spellName}");
         }
 
         return result.ToArray();
     }
 
-    // Struct used by NetworkManagerPUN to query loadouts by player ID
     public struct PlayerLoadout
     {
         public string spell1;
@@ -131,7 +155,6 @@ public class SpellSelectionManager : MonoBehaviourPunCallbacks
             return new PlayerLoadout { spell1 = s1, spell2 = s2 };
         }
 
-        // Default loadout if player never picked
         return new PlayerLoadout { spell1 = "Fireball", spell2 = "Shockwave" };
     }
 }

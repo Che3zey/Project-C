@@ -15,6 +15,9 @@ public class PlayerHealth : MonoBehaviourPun
     [Header("UI")]
     public Slider healthSlider;
 
+    // ✅ Added: property to check if the player is alive
+    public bool IsAlive => currentHealth > 0;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -41,7 +44,7 @@ public class PlayerHealth : MonoBehaviourPun
         if (!photonView.IsMine) return;
 
         currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // ✅ prevent negative HP
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // prevent negative HP
         UpdateHealthBar();
 
         if (currentHealth <= 0)
@@ -69,7 +72,7 @@ public class PlayerHealth : MonoBehaviourPun
         if (!photonView.IsMine) return;
 
         int oldHealth = currentHealth;
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth); // ✅ capped at max
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         int actualHealed = currentHealth - oldHealth;
 
         Debug.Log($"{gameObject.name} healed for {actualHealed}! Current HP: {currentHealth}/{maxHealth}");
@@ -82,7 +85,7 @@ public class PlayerHealth : MonoBehaviourPun
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth; // ✅ Slider expects absolute value, not normalized
+            healthSlider.value = currentHealth;
         }
     }
 
@@ -102,6 +105,7 @@ public class PlayerHealth : MonoBehaviourPun
             if (Camera.main != null)
                 Camera.main.transform.position = new Vector3(0, 0, Camera.main.transform.position.z);
 
+            // Instead of destroying immediately, we could delay slightly if needed
             PhotonNetwork.Destroy(gameObject);
         }
     }

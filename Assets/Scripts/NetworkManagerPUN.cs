@@ -57,6 +57,7 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
     {
         Debug.Log($"📜 Scene Loaded: {scene.name}");
 
+        // Spawn points, player, camera setup...
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint")
             .Select(go => go.transform)
             .OrderBy(t => t.name)
@@ -87,6 +88,28 @@ public class NetworkManagerPUN : MonoBehaviourPunCallbacks
             CameraFollow camFollow = mainCamera.GetComponent<CameraFollow>();
             if (camFollow != null)
                 camFollow.SetTarget(localPlayerInstance);
+        }
+
+        // 🖱 Cursor visibility and lock mode based on scene
+        UpdateCursorForScene(scene.name);
+    }
+
+    /// <summary>
+    /// Shows cursor in shop, hides and locks it in gameplay
+    /// </summary>
+    private void UpdateCursorForScene(string sceneName)
+    {
+        if (sceneName == "ShopScene" || sceneName == "MainMenu")
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            Debug.Log("🖱 Cursor unlocked and visible (Shop/MainMenu).");
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            Debug.Log("🖱 Cursor locked and hidden (Gameplay).");
         }
     }
 

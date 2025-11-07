@@ -50,8 +50,8 @@ MonoBehaviour:
   manaCost: 50
   cooldown: 5
   healAmount: 50
-  healRadius: 1
   duration: 1
+  verticalOffset: 1.2
   owner: {fileID: 0}
 --- !u!114 &349105152574779998
 MonoBehaviour:
